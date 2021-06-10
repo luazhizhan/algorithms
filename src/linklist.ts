@@ -35,8 +35,8 @@ export class LinkList {
 
   get(index: number): unknown | null {
     if (index < 0) throw new RangeError('Minimum index is 0.')
-    const max = this.size()
-    if (index > max - 1) throw new RangeError(`Maximum index is ${max}`)
+    const max = this.size() - 1
+    if (index > max) throw new RangeError(`Maximum index is ${max}`)
     if (index === 0) return this.head()
     if (index === max) return this.tail()
 
@@ -91,8 +91,13 @@ export class LinkList {
       return
     }
     if (this._tail === null) return
-    this._tail.next = new LinkNode(value)
-    this._tail = this._tail.next
+    let headHolder = this._head
+    while (headHolder.next) {
+      headHolder = headHolder.next
+    }
+    const newTail = new LinkNode(value)
+    headHolder.next = newTail
+    this._tail = newTail
     this._size++
   }
 
@@ -123,7 +128,89 @@ export class LinkList {
   }
 
   removeHead(): void {
-    if (this.head === null) return
+    if (this._head === null) return
+    switch (this._size) {
+      case 1:
+        this._head = null
+        this._tail = null
+        break
+      case 2:
+        this._head = this._tail
+        this._tail = this._head
+        break
+      default:
+        this._head = this._head.next
+        break
+    }
+    this._size--
+    return
+  }
+
+  removeTail(): void {
+    if (this._head === null) return
+    switch (this._size) {
+      case 1:
+        this._head = null
+        this._tail = null
+        break
+      case 2:
+        this._tail = this._head
+        this._head = this._tail
+        break
+      default: {
+        let newTail = this._head
+        while (newTail.next && newTail.next.next) {
+          newTail = newTail.next
+        }
+        newTail.next = null
+        this._tail = newTail
+        break
+      }
+    }
+    this._size--
+    return
+  }
+
+  remove(index: number): void {
+    if (index < 0) throw new RangeError('Minimum index is 0.')
+    const max = this.size() - 1
+    if (index > max) throw new RangeError(`Maximum index is ${max}`)
+    if (index === 0) {
+      this.removeHead()
+      return
+    }
+    if (index === max) {
+      this.removeTail()
+      return
+    }
+    let i = 0
+    let currentHead = this._head
+    if (currentHead === null) return // impossible case
+    while (i < index - 1) {
+      if (currentHead === null || currentHead.next === null) break
+      currentHead = currentHead.next
+      i++
+    }
+    currentHead.next = currentHead.next && currentHead.next.next
+    this._size--
+    return
+  }
+
+  reverse(): void {
+    let current = this._head
+    let next = null
+    let prev = null
+
+    // set head to tail
+    this._tail = new LinkNode(this._head?.value)
+
+    while (current !== null) {
+      next = current.next
+      current.next = prev
+      prev = current
+      current = next
+    }
+    this._head = prev
   }
 
   private _emptyInsert(value: unknown) {
