@@ -17,6 +17,7 @@ interface IStack<T> {
 export class Stack implements IStack<number> {
   private _container: number[]
 
+  // For static array which doesn't exist in JS
   private _capacity: number
 
   constructor() {

@@ -1,4 +1,5 @@
 export class MyArray implements Iterable<unknown> {
+  // For static array which doesn't exist in JS
   private _capacity: number
 
   private _container: unknown[]
