@@ -8,7 +8,7 @@ class LinkNode {
   }
 }
 
-export class LinkList {
+export class LinkList implements Iterable<unknown> {
   private _head: LinkNode | null
 
   private _tail: LinkNode | null
@@ -33,7 +33,17 @@ export class LinkList {
     return this._tail ? this._tail.value : null
   }
 
-  get(index: number): unknown | null {
+  clear(): void {
+    this._head = null
+    this._tail = null
+    this._size = 0
+  }
+
+  isEmpty(): boolean {
+    return this._size === 0
+  }
+
+  get(index: number): unknown {
     if (index < 0) throw new RangeError('Minimum index is 0.')
     const max = this.size() - 1
     if (index > max) throw new RangeError(`Maximum index is ${max}`)
@@ -49,7 +59,7 @@ export class LinkList {
         return currentHead && currentHead.value
       }
     }
-    return null
+    return
   }
 
   replace(oldValue: unknown, newValue: unknown): boolean {
@@ -75,7 +85,7 @@ export class LinkList {
     return false
   }
 
-  insertHead(value: unknown): void {
+  addFirst(value: unknown): void {
     if (this._head === null) {
       this._emptyInsert(value)
       return
@@ -85,7 +95,7 @@ export class LinkList {
     return
   }
 
-  insertTail(value: unknown): void {
+  addTail(value: unknown): void {
     if (this._head === null) {
       this._emptyInsert(value)
       return
@@ -101,16 +111,20 @@ export class LinkList {
     this._size++
   }
 
-  insert(value: unknown, index: number): void {
+  add(value: unknown): void {
+    this.addAt(value, this._size)
+  }
+
+  addAt(value: unknown, index: number): void {
     if (index < 0) throw new RangeError('Minimum index is 0.')
     const max = this.size()
     if (index > max) throw new RangeError(`Maximum index is ${max}`)
     if (index === 0) {
-      this.insertHead(value)
+      this.addFirst(value)
       return
     }
     if (index === max) {
-      this.insertTail(value)
+      this.addTail(value)
       return
     }
     let i = 0
@@ -127,7 +141,7 @@ export class LinkList {
     }
   }
 
-  removeHead(): void {
+  removeFirst(): void {
     if (this._head === null) return
     switch (this._size) {
       case 1:
@@ -146,7 +160,7 @@ export class LinkList {
     return
   }
 
-  removeTail(): void {
+  removeLast(): void {
     if (this._head === null) return
     switch (this._size) {
       case 1:
@@ -176,11 +190,11 @@ export class LinkList {
     const max = this.size() - 1
     if (index > max) throw new RangeError(`Maximum index is ${max}`)
     if (index === 0) {
-      this.removeHead()
+      this.removeFirst()
       return
     }
     if (index === max) {
-      this.removeTail()
+      this.removeLast()
       return
     }
     let i = 0
@@ -211,6 +225,20 @@ export class LinkList {
       current = next
     }
     this._head = prev
+  }
+
+  [Symbol.iterator](): Iterator<unknown> {
+    let current = this._head
+    return {
+      next: () => {
+        {
+          if (current === null) return { value: undefined, done: true }
+          const value = current.value
+          current = current.next
+          return { value, done: false }
+        }
+      },
+    }
   }
 
   private _emptyInsert(value: unknown) {
