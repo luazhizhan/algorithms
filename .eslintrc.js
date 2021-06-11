@@ -15,7 +15,6 @@ module.exports = {
     'plugin:prettier/recommended',
   ],
   rules: {
-    'no-shadow': 'error',
     eqeqeq: 'error',
   },
 }
