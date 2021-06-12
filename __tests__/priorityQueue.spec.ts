@@ -1,6 +1,6 @@
 import { PriorityQueue, Comparator } from '../src/priorityQueue'
 
-describe.only('PriorityQueue', () => {
+describe('PriorityQueue', () => {
   it('Construct a priority queue', () => {
     const queue = new PriorityQueue(Comparator.MIN)
     expect(queue.isEmpty()).toBeTruthy()
@@ -43,33 +43,34 @@ describe.only('PriorityQueue', () => {
     expect(queue.contains(2)).toBeFalsy()
     expect(queue.isEmpty()).toBeTruthy()
 
-    queue.add(1)
+    queue.add(2)
     queue.add(3)
     queue.add(3)
     queue.add(1)
+    queue.add(4)
+    queue.add(6)
     queue.add(5)
     queue.add(3)
     queue.add(0)
 
+    expect(queue.peek()).toBe(6)
+    expect(queue.poll()).toBe(6)
     expect(queue.peek()).toBe(5)
     expect(queue.poll()).toBe(5)
-
+    expect(queue.peek()).toBe(4)
+    expect(queue.poll()).toBe(4)
     expect(queue.peek()).toBe(3)
     expect(queue.poll()).toBe(3)
-
     expect(queue.peek()).toBe(3)
     expect(queue.poll()).toBe(3)
-
     expect(queue.peek()).toBe(3)
     expect(queue.poll()).toBe(3)
-
+    expect(queue.peek()).toBe(2)
+    expect(queue.poll()).toBe(2)
     expect(queue.peek()).toBe(1)
     expect(queue.poll()).toBe(1)
-
-    expect(queue.peek()).toBe(1)
-    expect(queue.poll()).toBe(1)
-
     expect(queue.peek()).toBe(0)
     expect(queue.poll()).toBe(0)
+    expect(queue.isEmpty()).toBeTruthy()
   })
 })

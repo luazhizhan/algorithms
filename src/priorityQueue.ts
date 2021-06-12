@@ -11,7 +11,7 @@ export const enum Comparator {
 }
 
 export class PriorityQueue<T extends Comparable> {
-  private _map: { [key in T]: number[] } // { values: container index array }
+  private _map: { [key in T]: number[] } // { values : container index array }
 
   private _container: T[]
 
@@ -102,8 +102,8 @@ export class PriorityQueue<T extends Comparable> {
   }
 
   private _sink(parent: T, parentIndex: number): void {
-    let lChildIndex = Math.floor(2 * parentIndex + 1)
-    let rChildIndex = Math.floor(2 * parentIndex + 2)
+    let lChildIndex = 2 * parentIndex + 1
+    let rChildIndex = 2 * parentIndex + 2
     let lChild = this._container[lChildIndex]
     let rChild = this._container[rChildIndex]
 
@@ -135,26 +135,32 @@ export class PriorityQueue<T extends Comparable> {
 
     while (
       // Not ascending order
-      (this._comparator === Comparator.MIN && lChild && parent > lChild) ||
-      (this._comparator === Comparator.MIN && rChild && parent > rChild) ||
+      (this._comparator === Comparator.MIN &&
+        lChild !== undefined &&
+        parent > lChild) ||
+      (this._comparator === Comparator.MIN &&
+        rChild !== undefined &&
+        parent > rChild) ||
       // Not descending order
-      (this._comparator === Comparator.MAX && lChild && parent < lChild) ||
-      (this._comparator === Comparator.MAX && rChild && parent < rChild)
+      (this._comparator === Comparator.MAX &&
+        lChild !== undefined &&
+        parent < lChild) ||
+      (this._comparator === Comparator.MAX &&
+        rChild !== undefined &&
+        parent < rChild)
     ) {
-      if (this._comparator === Comparator.MIN) {
-        // Always try to replace left node first
-        if (lChild && parent > lChild) {
-          _sinkParent(lChild, lChildIndex)
-        } else if (rChild && parent > rChild) {
-          _sinkParent(rChild, rChildIndex)
-        }
-      } else if (this._comparator === Comparator.MAX) {
-        // Always try to replace left node first
-        if (lChild && parent < lChild) {
-          _sinkParent(lChild, lChildIndex)
-        } else if (rChild && parent < rChild) {
-          _sinkParent(rChild, rChildIndex)
-        }
+      if (lChild === undefined && rChild !== undefined) {
+        _sinkParent(rChild, rChildIndex)
+        continue
+      }
+      if (lChild !== undefined && rChild === undefined) {
+        _sinkParent(lChild, lChildIndex)
+        continue
+      }
+      if (lChild !== undefined && rChild !== undefined) {
+        lChild > rChild
+          ? _sinkParent(lChild, lChildIndex)
+          : _sinkParent(rChild, rChildIndex)
       }
     }
   }
@@ -166,9 +172,13 @@ export class PriorityQueue<T extends Comparable> {
     let parent = this._container[parentIndex]
     while (
       // Not ascending order
-      (this._comparator === Comparator.MIN && parent && parent > child) ||
+      (this._comparator === Comparator.MIN &&
+        parent !== undefined &&
+        parent > child) ||
       // Not descending order
-      (this._comparator === Comparator.MAX && parent && parent < child)
+      (this._comparator === Comparator.MAX &&
+        parent !== undefined &&
+        parent < child)
     ) {
       // Replace parent with child index
       this._map[parent] = [
