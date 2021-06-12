@@ -5,7 +5,7 @@ type Comparable = string | number
  *
  * `MAX` -> Descending order
  */
-const enum Comparator {
+export const enum Comparator {
   MIN,
   MAX,
 }
@@ -23,28 +23,35 @@ export class PriorityQueue<T extends Comparable> {
     this._map = {} as { [key in T]: number[] }
   }
 
-  add(value: T): void {
-    const childIndex =
-      this._container.length === 0 ? 0 : this._container.length - 1
-
-    // add index to map value key
-    this._map[value] = this._map[value]
-      ? [...this._map[value], childIndex]
-      : (this._map[value] = [childIndex])
-
-    // add value to end of queue
-    this._container.push(value)
-
-    // update index of the new value
-    this._swim(value, childIndex)
-  }
-
   peek(): T | undefined {
     return this._container[0]
   }
 
   contains(value: T): boolean {
     return this._map[value] !== undefined
+  }
+
+  size(): number {
+    return this._container.length
+  }
+
+  isEmpty(): boolean {
+    return this._container.length === 0
+  }
+
+  add(value: T): void {
+    const childIndex = this._container.length
+
+    // add index to map value key
+    this._map[value] = this._map[value]
+      ? [...this._map[value], childIndex]
+      : [childIndex]
+
+    // add value to end of queue
+    this._container.push(value)
+
+    // update index of the new value
+    this._swim(value, childIndex)
   }
 
   /**
@@ -54,14 +61,10 @@ export class PriorityQueue<T extends Comparable> {
     const size = this._container.length
     if (size === 0) return undefined
 
-    // Get first element value and last element value
+    // Get first element value
     const firstIndex = 0
-    const lastIndex = size - 1
     const first = this._container[firstIndex]
-    const last = this._container[lastIndex]
-
-    // impossible case
-    if (first === undefined || last === undefined) return undefined
+    if (first === undefined) return undefined // Impossible case
 
     // Remove first element and returns it if size is just 1
     if (size === 1) {
@@ -70,21 +73,37 @@ export class PriorityQueue<T extends Comparable> {
       return first
     }
 
-    // update first value with last element
-    this._container[0] = last
+    // Get last element value
+    const lastIndex = size - 1
+    const last = this._container[lastIndex]
+    if (last === undefined) return undefined // Impossible case
 
-    // remove last element
+    // update first value with last element
+    // remove last element from container
+    this._container.shift()
+    this._container.unshift(last)
     this._container.splice(lastIndex, 1)
 
-    // update first element index
-    this._sink(first, firstIndex)
+    // remove first element index from map
+    const filtered = this._map[first].filter((a) => a !== firstIndex)
+    filtered.length === 0
+      ? delete this._map[first]
+      : (this._map[first] = filtered)
 
+    // Update last element index from last index to first index (0)
+    this._map[last] = [
+      ...this._map[last].filter((a) => a !== lastIndex),
+      firstIndex,
+    ]
+
+    // update last element index
+    this._sink(last, firstIndex)
     return first
   }
 
   private _sink(parent: T, parentIndex: number): void {
-    let lChildIndex = 2 * parentIndex + 1
-    let rChildIndex = 2 * parentIndex + 2
+    let lChildIndex = Math.floor(2 * parentIndex + 1)
+    let rChildIndex = Math.floor(2 * parentIndex + 2)
     let lChild = this._container[lChildIndex]
     let rChild = this._container[rChildIndex]
 
@@ -126,29 +145,23 @@ export class PriorityQueue<T extends Comparable> {
         // Always try to replace left node first
         if (lChild && parent > lChild) {
           _sinkParent(lChild, lChildIndex)
-          continue
-        }
-        if (rChild && parent > rChild) {
+        } else if (rChild && parent > rChild) {
           _sinkParent(rChild, rChildIndex)
-          continue
         }
-      }
-      if (this._comparator === Comparator.MAX) {
+      } else if (this._comparator === Comparator.MAX) {
         // Always try to replace left node first
         if (lChild && parent < lChild) {
           _sinkParent(lChild, lChildIndex)
-          continue
-        }
-        if (rChild && parent < rChild) {
+        } else if (rChild && parent < rChild) {
           _sinkParent(rChild, rChildIndex)
-          continue
         }
       }
     }
   }
 
   private _swim(child: T, childIndex: number): void {
-    const _parentIndex = (_childIndex: number): number => (_childIndex - 1) / 2
+    const _parentIndex = (_childIndex: number): number =>
+      Math.floor((_childIndex - 1) / 2)
     let parentIndex = _parentIndex(childIndex)
     let parent = this._container[parentIndex]
     while (
