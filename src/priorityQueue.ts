@@ -54,6 +54,55 @@ export class PriorityQueue<T extends Comparable> {
     this._swim(value, childIndex)
   }
 
+  clear(): void {
+    this._container = []
+    this._map = {} as { [key in T]: number[] }
+  }
+
+  remove(e: T): boolean {
+    const size = this._container.length
+    if (size === 0) return false
+
+    // Find index of the element to be remove
+    const eArr = this._map[e]
+    if (eArr === undefined || eArr[0] === undefined) return false
+    const removeIndex = eArr[0]
+
+    if (size === 1) {
+      this._container.splice(removeIndex, 1)
+      delete this._map[e]
+      return true
+    }
+
+    // Get last element value
+    const lastIndex = size - 1
+    const last = this._container[lastIndex]
+    if (last === undefined) return false // Impossible case
+
+    // Set remove index element and remove the last element in the queue
+    this._container[removeIndex] = last
+    this._container.pop()
+
+    // Remove index of the removed element in the map
+    const arr = this._map[e].filter((a) => a !== removeIndex)
+    arr.length === 0 ? delete this._map[e] : (this._map[e] = arr)
+
+    // No need to update map, sink/swim if
+    // the element removed is also at the last index
+    if (lastIndex === removeIndex) return true
+
+    // Update index of the replaced element in the map
+    this._map[last] = [
+      ...this._map[last].filter((a) => a !== lastIndex),
+      removeIndex,
+    ]
+
+    this._swim(last, removeIndex)
+    this._sink(last, removeIndex)
+
+    return true
+  }
+
   /**
    * Remove first element from queue
    */
@@ -80,9 +129,8 @@ export class PriorityQueue<T extends Comparable> {
 
     // update first value with last element
     // remove last element from container
-    this._container.shift()
-    this._container.unshift(last)
-    this._container.splice(lastIndex, 1)
+    this._container[0] = last
+    this._container.pop()
 
     // remove first element index from map
     const filtered = this._map[first].filter((a) => a !== firstIndex)
@@ -114,7 +162,6 @@ export class PriorityQueue<T extends Comparable> {
         ...this._map[child].filter((a) => a !== childIndex),
         parentIndex,
       ]
-
       // Replace parent with child index
       this._map[parent] = [
         ...this._map[parent].filter((a) => a !== parentIndex),
@@ -158,7 +205,13 @@ export class PriorityQueue<T extends Comparable> {
         continue
       }
       if (lChild !== undefined && rChild !== undefined) {
-        lChild > rChild
+        if (this._comparator === Comparator.MAX) {
+          lChild > rChild
+            ? _sinkParent(lChild, lChildIndex)
+            : _sinkParent(rChild, rChildIndex)
+          continue
+        }
+        lChild < rChild
           ? _sinkParent(lChild, lChildIndex)
           : _sinkParent(rChild, rChildIndex)
       }

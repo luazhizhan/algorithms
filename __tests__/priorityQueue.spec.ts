@@ -73,4 +73,68 @@ describe('PriorityQueue', () => {
     expect(queue.poll()).toBe(0)
     expect(queue.isEmpty()).toBeTruthy()
   })
+
+  it('Remove by element from priority queue', () => {
+    const queue = new PriorityQueue(Comparator.MIN)
+
+    expect(queue.remove(2)).toBeFalsy()
+    queue.add(3)
+    expect(queue.remove(2)).toBeFalsy()
+    expect(queue.remove(3)).toBeTruthy()
+    expect(queue.peek()).toBeUndefined()
+    expect(queue.isEmpty()).toBeTruthy()
+
+    queue.add(4)
+    queue.add(1)
+    queue.add(3)
+    queue.add(1)
+    queue.add(1)
+    queue.add(5)
+    queue.add(3)
+    queue.add(0)
+
+    expect(queue.remove(4)).toBeTruthy()
+    expect(queue.remove(4)).toBeFalsy()
+    expect(queue.contains(4)).toBeFalsy()
+    expect(queue.peek()).toBe(0)
+
+    expect(queue.remove(0)).toBeTruthy()
+    expect(queue.remove(0)).toBeFalsy()
+    expect(queue.contains(0)).toBeFalsy()
+    expect(queue.peek()).toBe(1)
+    expect(queue.remove(1)).toBeTruthy()
+    expect(queue.remove(1)).toBeTruthy()
+    expect(queue.remove(1)).toBeTruthy()
+    expect(queue.remove(1)).toBeFalsy()
+    expect(queue.contains(1)).toBeFalsy()
+
+    expect(queue.peek()).toBe(3)
+    expect(queue.remove(5)).toBeTruthy()
+    expect(queue.remove(5)).toBeFalsy()
+    expect(queue.contains(5)).toBeFalsy()
+
+    expect(queue.peek()).toBe(3)
+    expect(queue.remove(3)).toBeTruthy()
+    expect(queue.remove(3)).toBeTruthy()
+    expect(queue.remove(3)).toBeFalsy()
+    expect(queue.contains(3)).toBeFalsy()
+
+    expect(queue.isEmpty()).toBeTruthy()
+  })
+
+  it('Clear the queue', () => {
+    const queue = new PriorityQueue(Comparator.MIN)
+    queue.clear()
+    expect(queue.isEmpty()).toBeTruthy()
+    expect(queue.peek()).toBeUndefined()
+
+    queue.add(4)
+    queue.add(1)
+    queue.add(3)
+    queue.add(1)
+
+    queue.clear()
+    expect(queue.isEmpty()).toBeTruthy()
+    expect(queue.peek()).toBeUndefined()
+  })
 })
