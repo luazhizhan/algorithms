@@ -81,6 +81,8 @@ export class BST<T extends Comparable> {
   private _deleteKey(root: BST<T> | null, key: T | null): BST<T> | null {
     if (key === null || this.values[key] === undefined) return root
     if (root === null || root.key === null) return root
+
+    // Tree contain only 1 key
     if (Object.keys(this.values).length === 1 && root.key === key) {
       delete this.values[key]
       root.key = null
@@ -99,10 +101,23 @@ export class BST<T extends Comparable> {
         delete this.values[key]
         return root.left
       }
+      // node with two children: Get the inorder
+      // successor (smallest in the right subtree)
       root.key = this._minValue(root.right)
+
+      // Delete the inorder successor
       root.right = this._deleteKey(root.right, root.key)
     }
     return root
+  }
+
+  private _minValue(root: BST<T>): T {
+    let minv = root.key
+    while (root.left !== null) {
+      minv = root.left.key
+      root = root.left
+    }
+    return minv as T
   }
 
   preOrder(lst: T[], node: BST<T> | null): void {
@@ -137,14 +152,5 @@ export class BST<T extends Comparable> {
       if (n.left !== null) queue.push(n.left)
       if (n.right !== null) queue.push(n.right)
     }
-  }
-
-  private _minValue(root: BST<T>): T {
-    let minv = root.key
-    while (root.left !== null) {
-      minv = root.left.key
-      root = root.left
-    }
-    return minv as T
   }
 }
