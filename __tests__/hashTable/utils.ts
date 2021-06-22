@@ -1,3 +1,5 @@
+export type HashMap = { [key in string]: unknown }
+
 export const LOOPS = 50
 export const MAX_SIZE = randInt(1, 30)
 export const MAX_RAND_NUM = randInt(1, 10)

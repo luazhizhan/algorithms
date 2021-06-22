@@ -1,24 +1,16 @@
-import { HashTableSeparateChaining } from '../../src/hashTable/seperateChaining'
+import { HashTableLinearProbing } from '../../src/hashTable/linearProbing'
 import {
   genRandList,
-  MAX_RAND_NUM,
-  randInt,
-  LOOPS,
-  MAX_SIZE,
   HashMap,
+  LOOPS,
+  MAX_RAND_NUM,
+  MAX_SIZE,
+  randInt,
 } from './utils'
 
-describe('HashTableSeparateChaining', () => {
-  it('Illegal creation', () => {
-    expect(() => new HashTableSeparateChaining(-3, 0.5)).toThrowError()
-    expect(
-      () => new HashTableSeparateChaining(5, Number.POSITIVE_INFINITY)
-    ).toThrowError()
-    expect(() => new HashTableSeparateChaining(6, -0.5)).toThrowError()
-  })
-
+describe('HashTableLinearProbing', () => {
   it('Update value', () => {
-    const map = new HashTableSeparateChaining<number, number>(6, 0.9)
+    const map = new HashTableLinearProbing<number, number>()
     map.add(1, 1)
     expect(map.get(1)).toBe(1)
 
@@ -29,8 +21,27 @@ describe('HashTableSeparateChaining', () => {
     expect(map.get(1)).toBe(-7)
   })
 
+  it('Remove Random', () => {
+    const map = new HashTableLinearProbing<number, number>()
+    for (let i = 0; i < LOOPS; i++) {
+      map.clear()
+      const keySet = {} as HashMap
+      for (let i = 0; i < MAX_SIZE; i++) {
+        const randomVal = randInt(-MAX_RAND_NUM, MAX_RAND_NUM)
+        keySet[randomVal] = randomVal
+        map.put(randomVal, 5)
+      }
+
+      expect(map.size()).toBe(Object.keys(keySet).length)
+
+      const keys = map.keys()
+      for (const key of keys) map.remove(key)
+      expect(map.isEmpty()).toBeTruthy()
+    }
+  })
+
   it('Remove', () => {
-    const map = new HashTableSeparateChaining<number, number>()
+    const map = new HashTableLinearProbing<number, number>(7)
 
     // add 3 elements
     map.put(11, 0)
@@ -53,29 +64,8 @@ describe('HashTableSeparateChaining', () => {
     expect(map.size()).toBe(0)
   })
 
-  it('Random remove', () => {
-    const map = new HashTableSeparateChaining<number, number>()
-    for (let loop = 0; loop < LOOPS; loop++) {
-      map.clear()
-
-      // Add some random values
-      const keySet = {} as HashMap
-      for (let i = 0; i < MAX_SIZE; i++) {
-        const randomVal = randInt(-MAX_RAND_NUM, MAX_RAND_NUM)
-        keySet[randomVal] = randomVal
-        map.put(randomVal, 5)
-      }
-
-      expect(map.size()).toBe(Object.keys(keySet).length)
-
-      const keys = map.keys()
-      for (const key of keys) map.remove(key)
-      expect(map.isEmpty()).toBeTruthy()
-    }
-  })
-
   it('Complex remove', () => {
-    const map = new HashTableSeparateChaining<{ 88: number }, number>()
+    const map = new HashTableLinearProbing<{ 88: number }, number>()
     const o1 = { 88: 1 }
     const o2 = { 88: 2 }
     const o3 = { 88: 3 }
@@ -95,7 +85,7 @@ describe('HashTableSeparateChaining', () => {
 
   it('Random map operation', () => {
     let jmap = {} as HashMap
-    const map = new HashTableSeparateChaining<number, number>()
+    const map = new HashTableLinearProbing<number, number>()
     for (let loop = 0; loop < LOOPS; loop++) {
       map.clear()
       jmap = {}
@@ -133,9 +123,9 @@ describe('HashTableSeparateChaining', () => {
   })
 
   it('Iterator', () => {
-    const map = new HashTableSeparateChaining<number, number>()
+    const map = new HashTableLinearProbing<number, number>()
     let map2 = {} as HashMap
-    for (let loop = 0; loop < LOOPS; loop++) {
+    for (let i = 0; i < LOOPS; i++) {
       map.clear()
       map2 = {} as HashMap
       expect(map.isEmpty()).toBeTruthy()
@@ -147,13 +137,11 @@ describe('HashTableSeparateChaining', () => {
         expect(map.add(key, key)).toBe(value)
       }
 
-      let count = 0
       for (const key of map) {
         expect(map.get(key)).toBe(key)
         expect(map.get(key)).toBe(map2[key])
         expect(map.hasKey(key)).toBeTruthy()
         expect(randNums.includes(key)).toBeTruthy()
-        count++
       }
 
       for (const key in map2) {
@@ -165,8 +153,58 @@ describe('HashTableSeparateChaining', () => {
       const set = new Set()
       for (const n of randNums) set.add(n)
 
-      expect(set.size).toBe(count)
-      expect(Object.keys(map2).length).toBe(count)
+      expect(set.size).toBe(map.keys().length)
+      expect(Object.keys(map2).length).toBe(map.keys().length)
     }
+  })
+
+  it('Random iterator', () => {
+    let map = new HashTableLinearProbing<number, number[]>()
+    let hmap = {} as HashMap
+    for (let loop = 0; loop < LOOPS; loop++) {
+      map.clear()
+      hmap = {}
+      expect(map.size()).toBe(Object.keys(hmap).length)
+
+      const sz = randInt(1, MAX_SIZE)
+      map = new HashTableLinearProbing<number, number[]>(sz)
+      const probability = Math.random()
+      for (let i = 0; i < MAX_SIZE; i++) {
+        const index = randInt(0, MAX_SIZE - 1)
+        let l1 = map.get(index) as number[] | undefined
+        let l2 = hmap[index] as number[] | undefined
+
+        if (l1 === undefined || l2 === undefined) {
+          l1 = []
+          l2 = []
+          map.put(index, l1)
+          hmap[index] = l2
+        }
+        const randVal = randInt(-MAX_SIZE, MAX_SIZE)
+        if (Math.random() < probability) {
+          l1.filter((a) => a !== randVal)
+          l2.filter((a) => a !== randVal)
+        } else {
+          l1.push(randVal)
+          l2.push(randVal)
+        }
+
+        expect(Object.keys(hmap).length).toBe(map.size())
+        expect(l1).toEqual(l2)
+      }
+    }
+  })
+
+  it('Illegal creation', () => {
+    expect(
+      () => new HashTableLinearProbing<number, number>(-3, 0.5)
+    ).toThrowError()
+    expect(
+      () =>
+        new HashTableLinearProbing<number, number>(5, Number.POSITIVE_INFINITY)
+    ).toThrowError()
+    expect(
+      () => new HashTableLinearProbing<number, number>(6, -0.5)
+    ).toThrowError()
   })
 })
