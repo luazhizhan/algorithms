@@ -1,11 +1,4 @@
-function _hashCode(key: unknown): number {
-  const s = JSON.stringify(key)
-  let h = 1
-  for (let i = 0; i < s.length; i++) {
-    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0
-  }
-  return h
-}
+import { hashCode, normalizeIndex } from './utils'
 
 class Entry<K, V> {
   hash: number
@@ -17,7 +10,7 @@ class Entry<K, V> {
   constructor(key: K, value: V) {
     this.key = key
     this.value = value
-    this.hash = _hashCode(key)
+    this.hash = hashCode(key)
   }
 
   // We are not overriding the Object equals method
@@ -76,12 +69,6 @@ export class HashTableSeparateChaining<K, V> implements Iterable<K> {
     return this._size === 0
   }
 
-  // Converts a hash value to an index. Essentially, this strips the
-  // negative sign and places the hash value in the domain [0, capacity)
-  private _normalizeIndex(keyHash: number): number {
-    return (keyHash & 0x7fffffff) % this._capacity
-  }
-
   clear(): void {
     this._table = []
     this._size = 0
@@ -93,7 +80,7 @@ export class HashTableSeparateChaining<K, V> implements Iterable<K> {
 
   // Returns true/false depending on whether a key is in the hash table
   hasKey(key: K): boolean {
-    const bucketIndex = this._normalizeIndex(_hashCode(key))
+    const bucketIndex = normalizeIndex(hashCode(key), this._capacity)
     return this._bucketSeekEntry(bucketIndex, key) !== null
   }
 
@@ -108,7 +95,7 @@ export class HashTableSeparateChaining<K, V> implements Iterable<K> {
 
   insert(key: K, value: V): V | null {
     const newEntry = new Entry(key, value)
-    const bucketIndex = this._normalizeIndex(newEntry.hash)
+    const bucketIndex = normalizeIndex(newEntry.hash, this._capacity)
     return this._bucketInsertEntry(bucketIndex, newEntry)
   }
 
@@ -116,7 +103,7 @@ export class HashTableSeparateChaining<K, V> implements Iterable<K> {
   // NOTE: returns null if the value is null AND also returns
   // null if the key does not exists, so watch out..
   get(key: K): V | null {
-    const bucketIndex = this._normalizeIndex(_hashCode(key))
+    const bucketIndex = normalizeIndex(hashCode(key), this._capacity)
     const entry = this._bucketSeekEntry(bucketIndex, key)
     if (entry === null) return null
     return entry.value
@@ -126,7 +113,7 @@ export class HashTableSeparateChaining<K, V> implements Iterable<K> {
   // NOTE: returns null if the value is null AND also returns
   // null if the key does not exists.
   remove(key: K): V | null {
-    const bucketIndex = this._normalizeIndex(_hashCode(key))
+    const bucketIndex = normalizeIndex(hashCode(key), this._capacity)
     return this._bucketRemoveEntry(bucketIndex, key)
   }
 
@@ -215,7 +202,7 @@ export class HashTableSeparateChaining<K, V> implements Iterable<K> {
       const oldBucket = this._table[i]
       if (oldBucket === undefined) continue
       for (const entry of oldBucket) {
-        const bucketIndex = this._normalizeIndex(entry.hash)
+        const bucketIndex = normalizeIndex(entry.hash, this._capacity)
         let newBucket = newTable[bucketIndex]
         if (newBucket === undefined) newTable[bucketIndex] = newBucket = []
         newBucket.push(entry)

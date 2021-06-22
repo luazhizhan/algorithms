@@ -1,28 +1,7 @@
-import { HashTableSeparateChaining } from '../src/hashTableSeperateChaining'
+import { HashTableSeparateChaining } from '../../src/hashTable/seperateChaining'
+import { genRandList, MAX_RAND_NUM, randInt, LOOPS, MAX_SIZE } from './utils'
 
 type HashMap = { [key in string]: unknown }
-const LOOPS = 50
-const MAX_SIZE = randInt(1, 30)
-const MAX_RAND_NUM = randInt(1, 10)
-
-function randInt(min: number, max: number): number {
-  min = Math.ceil(min)
-  max = Math.floor(max)
-  return Math.floor(Math.random() * (max - min + 1)) + min
-}
-
-function genRandList(sz: number): number[] {
-  const lst = []
-  for (let i = 0; i < sz; i++) {
-    lst.push(randInt(-MAX_RAND_NUM, MAX_RAND_NUM))
-  }
-  shuffle(lst)
-  return lst
-}
-
-function shuffle(array: number[]): number[] {
-  return array.sort(() => 0.5 - Math.random())
-}
 
 describe('HashTableSeparateChaining', () => {
   it('Illegal creation', () => {
