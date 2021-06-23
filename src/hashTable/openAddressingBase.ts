@@ -5,7 +5,6 @@ export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
 
   protected capacity: number
   protected threshold: number
-  protected modificationCount: number
 
   // 'usedBuckets' counts the total number of used buckets inside the
   // hash-table (includes cells marked as deleted). While 'keyCount'
@@ -46,7 +45,6 @@ export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
     this._keys = []
     this._values = []
 
-    this.modificationCount = 0
     this.usedBuckets = 0
     this.keyCount = 0
   }
@@ -72,7 +70,6 @@ export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
     this._values = []
     this.usedBuckets = 0
     this.keyCount = 0
-    this.modificationCount++
   }
 
   // Returns the number of keys currently inside the hash-table
@@ -242,7 +239,6 @@ export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
       // The key we want to remove is in the hash-table!
       if (iKey === key) {
         this.keyCount--
-        this.modificationCount--
         const oldValue = this._values[i]
         if (oldValue === undefined) return null
         this._keys[i] = this.TOMBSTONE
@@ -313,7 +309,6 @@ export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
             this._keys[j] = key
             this._values[j] = val
           }
-          this.modificationCount++
           return oldValue as V | null
         }
         // Current cell is null so an insertion/update can occur
@@ -334,7 +329,6 @@ export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
           this._values[j] = val
         }
 
-        this.modificationCount++
         return null
       }
       i = normalizeIndex(offSet + this.probe(x++), this.capacity)
