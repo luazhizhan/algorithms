@@ -1,4 +1,5 @@
 import { hashCode, normalizeIndex } from './utils'
+import { instanceOfSecondaryHash } from './secondaryHash'
 
 export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
   protected loadFactor: number
@@ -142,8 +143,16 @@ export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
         if (j === -1) j = i
         // We hit a non-null key, perhaps it's the one we're looking for.
       } else if (iKey !== undefined) {
+        // Use the hash code for key that is a secondary hash object
+        const iKeyCode = (
+          instanceOfSecondaryHash(iKey) ? iKey._hashCode2() : iKey
+        ) as K
+        const kKeyCode = (
+          instanceOfSecondaryHash(key) ? key._hashCode2() : key
+        ) as K
+
         // The key we want is in the hash-table!
-        if (iKey === key) {
+        if (iKeyCode === kKeyCode) {
           const iValues = this._values[i]
 
           // If j != -1 this means we previously encountered a deleted cell.
@@ -188,8 +197,16 @@ export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
 
         // We hit a non-null key, perhaps it's the one we're looking for.
       } else if (iKey !== undefined) {
+        // Use the hash code for key that is a secondary hash object
+        const iKeyCode = (
+          instanceOfSecondaryHash(iKey) ? iKey._hashCode2() : iKey
+        ) as K
+        const kKeyCode = (
+          instanceOfSecondaryHash(key) ? key._hashCode2() : key
+        ) as K
+
         // The key we want is in the hash-table!
-        if (iKey === key) {
+        if (iKeyCode === kKeyCode) {
           const iValues = this._values[i]
           if (iValues === undefined) return null
 
@@ -236,8 +253,16 @@ export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
       // Key was not found in hash-table.
       if (iKey === undefined) return null
 
+      // Use the hash code for key that is a secondary hash object
+      const iKeyCode = (
+        instanceOfSecondaryHash(iKey) ? iKey._hashCode2() : iKey
+      ) as K
+      const kKeyCode = (
+        instanceOfSecondaryHash(key) ? key._hashCode2() : key
+      ) as K
+
       // The key we want to remove is in the hash-table!
-      if (iKey === key) {
+      if (iKeyCode === kKeyCode) {
         this.keyCount--
         const oldValue = this._values[i]
         if (oldValue === undefined) return null
@@ -291,14 +316,24 @@ export abstract class OpenAddressingBase<K, V> implements Iterable<K> {
 
     // eslint-disable-next-line no-constant-condition
     while (true) {
+      const iKey = this._keys[i]
       // The current slot was previously deleted
-      if (this._keys[i] === this.TOMBSTONE) {
+      if (iKey === this.TOMBSTONE) {
         if (j === -1) j = i
         // The current cell already contains a key
-      } else if (this._keys[i] !== undefined) {
+      } else if (iKey !== undefined) {
         // The key we're trying to insert already exists in the hash-table,
         // so update its value with the most recent value
-        if (this._keys[i] === key) {
+
+        // Use the hash code for key that is a secondary hash object
+        const iKeyCode = (
+          instanceOfSecondaryHash(iKey) ? iKey._hashCode2() : iKey
+        ) as K
+        const kKeyCode = (
+          instanceOfSecondaryHash(key) ? key._hashCode2() : key
+        ) as K
+
+        if (iKeyCode === kKeyCode) {
           const oldValue = this._values[i]
           if (j === -1) {
             this._values[i] = val

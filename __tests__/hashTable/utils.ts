@@ -15,10 +15,10 @@ export function genRandList(sz: number): number[] {
   for (let i = 0; i < sz; i++) {
     lst.push(randInt(-MAX_RAND_NUM, MAX_RAND_NUM))
   }
-  shuffle(lst)
+  shuffle<number>(lst)
   return lst
 }
 
-export function shuffle(array: number[]): number[] {
+export function shuffle<T>(array: T[]): T[] {
   return array.sort(() => 0.5 - Math.random())
 }
