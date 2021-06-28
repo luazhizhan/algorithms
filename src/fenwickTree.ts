@@ -16,6 +16,7 @@ export class FenwickTree {
       // does not get used, O(n) construction.
       this.N = sizeOrValues.length
       sizeOrValues[0] = 0
+
       // Make a clone of the values array since we manipulate
       // the array in place destroying all its original content.
       this.tree = [...sizeOrValues]
