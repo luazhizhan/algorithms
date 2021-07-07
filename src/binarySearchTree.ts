@@ -1,4 +1,4 @@
-type Comparable = string | number
+import { Comparable } from './helper'
 
 export class BST<T extends Comparable> {
   key: T | null

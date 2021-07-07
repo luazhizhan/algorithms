@@ -1,3 +1,4 @@
+import { compareTo as _compareTo } from '../helper'
 import { SuffixArray } from './suffixArray'
 
 // Medium speed suffix array implementation. Time Complexity: O(nlog^2(n))
@@ -12,19 +13,8 @@ export class SuffixRankTuple {
 
   // Sort Suffix ranks first on the first half then the second half
   compareTo(other: SuffixRankTuple): number {
-    const cmp =
-      this.firstHalf === other.firstHalf
-        ? 0
-        : this.firstHalf > other.firstHalf
-        ? 1
-        : -1
-    if (cmp === 0) {
-      return this.secondHalf === other.secondHalf
-        ? 0
-        : this.secondHalf > other.secondHalf
-        ? 1
-        : -1
-    }
+    const cmp = _compareTo(this.firstHalf, other.firstHalf)
+    if (cmp === 0) return _compareTo(this.secondHalf, other.secondHalf)
     return cmp
   }
 

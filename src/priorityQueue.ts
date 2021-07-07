@@ -1,4 +1,4 @@
-type Comparable = string | number
+import { Comparable } from './helper'
 
 /**
  * `MIN` -> Ascending order
