@@ -1,0 +1,19 @@
+import { Comparable } from '../helper'
+import { DHeap } from './dHeap'
+
+/**
+ * An implementation of an indexed binary heap priority queue.
+ *
+ * <p>This implementation supports arbitrary keys with comparable values. To use arbitrary keys
+ * (such as strings or objects) first map all your keys to the integer domain [0, N) where N is the
+ * number of keys you have and then use the mapping with this indexed priority queue.
+ *
+ * <p>As convention, I denote 'ki' as the index value in the domain [0, N) associated with key k,
+ * therefore: ki = map[k]
+ *
+ */
+export class BinaryHeap<T extends Comparable> extends DHeap<T> {
+  constructor(maxSize: number) {
+    super(2, maxSize)
+  }
+}
